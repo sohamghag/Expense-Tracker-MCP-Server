@@ -1,0 +1,21 @@
+[project]
+name = "expense-mcp-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "sohamghag", email = "sohamghag.dev@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "fastmcp>=3.4.7",
+    "python-dotenv>=1.2.2",
+    "supabase>=2.31.0",
+]
+
+[project.scripts]
+expense-mcp-server = "expense_mcp_server:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
