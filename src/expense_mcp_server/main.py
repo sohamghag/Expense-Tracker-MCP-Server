@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 from pathlib import Path
 import json
-from fastmcp.server.dependencies import get_http_headers
+from fastmcp.server.dependencies import get_http_headers, get_http_request
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CATEGORY_PATH = BASE_DIR / "categories.json"
@@ -19,6 +20,18 @@ supabase: Client = create_client(
     SUPABASE_SECRET_KEY
 )
 
+def current_user_id() -> str:
+    """Resolve the caller's user_id from header, falling back to the URL query."""
+    uid = get_http_headers().get("x-user-id")
+    if not uid:
+        try:
+            uid = get_http_request().query_params.get("user_id")
+        except RuntimeError:
+            uid = None
+    if not uid:
+        raise ValueError("No user identity: send X-User-ID or ?user_id= in the MCP URL")
+    return uid
+
 mcp = FastMCP(name="Expense-Server")
 
 @mcp.tool
@@ -31,6 +44,14 @@ def add_transactions(transaction_name: str,
     payment_mode: str):
     """Add a new expense transaction to the database."""
     try:
+
+        
+        user_id = current_user_id()
+        
+        if not user_id:
+            raise ValueError("Missing X-User-ID header")
+            
+
         response = supabase.table("transactions").insert({
         "transaction_name": transaction_name,
         "receiver_account_name": receiver_account_name,
@@ -38,7 +59,8 @@ def add_transactions(transaction_name: str,
         "note": note,
         "category": category,
         "amount": amount,
-        "payment_mode": payment_mode
+        "payment_mode": payment_mode,
+        "user_id":user_id
         }).execute()    
 
         return response.data
@@ -54,9 +76,7 @@ def list_transactions(
 ):
     """List expense transactions. Optionally filter by a start and end date."""
 
-    headers = get_http_headers()
-
-    user_id = headers.get("x-user-id")
+    user_id = current_user_id()
 
     if not user_id:
             raise ValueError("Missing X-User-ID header")
@@ -102,9 +122,7 @@ def update_transaction(
 ):
     """Update an existing expense transaction using its transaction ID."""
     try:
-        headers = get_http_headers()
-        
-        user_id = headers.get("x-user-id")
+        user_id = current_user_id()
             
         if not user_id:
             raise ValueError("Missing X-User-ID header")
@@ -137,9 +155,7 @@ def delete_transaction(
     transaction_id: int):
     """Delete an expense transaction using its transaction ID."""
     try:
-        headers = get_http_headers()
-                
-        user_id = headers.get("x-user-id")
+        user_id = current_user_id()
                     
         if not user_id:
             raise ValueError("Missing X-User-ID header")
@@ -168,9 +184,7 @@ def get_transaction_summary(
     transaction count, spending by category, and spending by payment mode.
     """
     try:
-        headers = get_http_headers()
-
-        user_id = headers.get("x-user-id")
+        user_id = current_user_id()
 
         if not user_id:
             raise ValueError("Missing X-User-ID header")
