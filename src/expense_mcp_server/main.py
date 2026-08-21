@@ -102,6 +102,13 @@ def update_transaction(
 ):
     """Update an existing expense transaction using its transaction ID."""
     try:
+        headers = get_http_headers()
+        
+        user_id = headers.get("x-user-id")
+            
+        if not user_id:
+            raise ValueError("Missing X-User-ID header")
+    
         response = (
             supabase
             .table("transactions")
@@ -115,6 +122,7 @@ def update_transaction(
                 "payment_mode": payment_mode
             })
             .eq("id", transaction_id)   
+            .eq("user_id", user_id)
             .execute()
         )
 
@@ -129,11 +137,19 @@ def delete_transaction(
     transaction_id: int):
     """Delete an expense transaction using its transaction ID."""
     try:
+        headers = get_http_headers()
+                
+        user_id = headers.get("x-user-id")
+                    
+        if not user_id:
+            raise ValueError("Missing X-User-ID header")
+        
         response = (
             supabase
             .table("transactions")
             .delete()
-            .eq("id", transaction_id)   
+            .eq("id", transaction_id)
+            .eq("user_id", user_id)   
             .execute()
         )
 
@@ -152,9 +168,17 @@ def get_transaction_summary(
     transaction count, spending by category, and spending by payment mode.
     """
     try:
+        headers = get_http_headers()
+
+        user_id = headers.get("x-user-id")
+
+        if not user_id:
+            raise ValueError("Missing X-User-ID header")
+
         response = supabase.rpc(
             "get_transaction_summary",
             {
+                "user_id_param": user_id,
                 "start_date_param": start_date,
                 "end_date_param": end_date
             }
