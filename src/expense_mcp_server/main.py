@@ -154,6 +154,14 @@ def get_transaction_summary(
         raise
 
 
-if __name__ == '__main__':
-    # mcp.run() # this is for local MCP Server
-    mcp.run(transport='http',host="0.0.0.0",port=8000) # this is for making it Remote Server
+# if __name__ == '__main__':
+#     # mcp.run() # this is for local MCP Server
+#     mcp.run(transport='http',host="0.0.0.0",port=8000) # this is for making it Remote Server
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))
+
+    mcp.run(
+        transport="http",
+        host="0.0.0.0",
+        port=port
+    )
