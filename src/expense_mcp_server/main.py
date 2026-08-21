@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 from pathlib import Path
 import json
+from fastmcp.server.dependencies import get_http_headers
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CATEGORY_PATH = BASE_DIR / "categories.json"
@@ -52,9 +53,21 @@ def list_transactions(
     end_date: str | None = None
 ):
     """List expense transactions. Optionally filter by a start and end date."""
+
+    headers = get_http_headers()
+
+    user_id = headers.get("x-user-id")
+
+    if not user_id:
+            raise ValueError("Missing X-User-ID header")
     
     try:
-        query = supabase.table("transactions").select("*")
+        query = (
+            supabase
+            .table("transactions")
+            .select("*")
+            .eq("user_id", user_id)
+        )
 
         if start_date:
             query = query.gte("date", start_date)
