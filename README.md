@@ -16,17 +16,17 @@ The server uses **FastMCP** and **Supabase** as the backend database, allowing M
           │       FastMCP        │
           └──────────┬───────────┘
                      │
-          ┌──────────┴───────────┐
-          │                      │
-        Tools                Resources
-          │                      │
-          ▼                      ▼
-   Expense Operations      categories://all
-          │
-          ▼
-       Supabase
-          │
-          ▼
-     transactions
-        table
+                     |
+                     │
+                  Tools
+                     │
+                     ▼
+               Expense Operations
+                     │
+                     ▼
+                  Supabase
+                     │
+                     ▼
+               transactions
+                  table
 ```
